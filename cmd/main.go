@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/d-tsuji/markdownlink"
+	markdownlink "github.com/d-tsuji/markdownlink"
 	"github.com/urfave/cli/v2"
 )
 
