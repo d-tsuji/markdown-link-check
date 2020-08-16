@@ -1,6 +1,12 @@
-# Markdown Lint Checker
+# Markdown Lint Checker (mlc)
 
-A tool to check for broken links in markdowns.
+A tool to check for broken links in markdowns. Because mlc can check links in parallel, it is very fast. Check for links that are described as markdown links or images.
+
+It does not check for links in code like the following.
+
+```
+xxx
+```
 
 ## Usage
 
@@ -65,17 +71,18 @@ $ brew install mlc
 ### CentOS
 
 ```
-$ sudo rpm -ivh https://github.com/d-tsuji/markdown-link-check/releases/download/v0.0.1/mlc_0.0.1_Tux-64-bit.rpm
+$ sudo rpm -ivh https://github.com/d-tsuji/markdown-link-check/releases/download/v0.0.2/mlc_0.0.2_Tux-64-bit.rpm
 ```
 
 ### Debian, Ubuntu
 
 ```
-$ wget https://github.com/d-tsuji/markdown-link-check/releases/download/v0.0.1/mlc_0.0.1_Tux-64-bit.deb
-$ sudo dpkg -i mlc_0.0.1_Tux-64-bit.deb
+$ wget https://github.com/d-tsuji/markdown-link-check/releases/download/v0.0.2/mlc_0.0.2_Tux-64-bit.deb
+$ sudo dpkg -i mlc_0.0.2_Tux-64-bit.deb
 ```
 
 ### go get
 
 ```
 $ go get -u github.com/d-tsuji/markdownlink/cmd/mlc
+```
