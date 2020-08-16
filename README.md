@@ -78,4 +78,4 @@ $ sudo dpkg -i mlc_0.0.1_Tux-64-bit.deb
 ### go get
 
 ```
-$ go get -u github.com/d-tsuji/markdown-link-check/cmd
+$ go get -u github.com/d-tsuji/markdownlink/cmd
