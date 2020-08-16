@@ -47,3 +47,35 @@ $ mlc testdata/README.md
 [✓] #post-registertask_id
 [✓] https://github.com/d-tsuji/flower/blob/master/LICENSE
 ```
+
+## Install
+
+### Binary
+
+If you need the Binary file, download the zip file of the version you want from the [Releases](https://github.com/d-tsuji/markdown-link-check/releases) page.
+Unzip the zip file and place the Binary file where the path will take you.
+
+### macOS
+
+```
+$ brew tap d-tsuji/mlc
+$ brew install mlc
+```
+
+### CentOS
+
+```
+$ sudo rpm -ivh https://github.com/d-tsuji/markdown-link-check/releases/download/v0.0.1/mlc_0.0.1_Tux-64-bit.rpm
+```
+
+### Debian, Ubuntu
+
+```
+$ wget https://github.com/d-tsuji/markdown-link-check/releases/download/v0.0.1/mlc_0.0.1_Tux-64-bit.deb
+$ sudo dpkg -i mlc_0.0.1_Tux-64-bit.deb
+```
+
+### go get
+
+```
+$ go get -u github.com/d-tsuji/markdown-link-check/cmd
