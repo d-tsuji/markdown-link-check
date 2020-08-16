@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/mattn/go-colorable"
@@ -16,7 +17,7 @@ import (
 type checker struct {
 	inputURL  *url.URL
 	inputData []byte
-	target    []target
+	targets   []target
 	client    *http.Client
 }
 
@@ -45,9 +46,12 @@ func Check(config Config) error {
 		return err
 	}
 	c.retrieveLinks()
-	DefaultProgressBar.Start(len(c.target))
+	DefaultProgressBar.Start(len(c.targets))
 
-	res := c.checkLinks()
+	res, err := c.checkLinks()
+	if err != nil {
+		return err
+	}
 
 	DefaultProgressBar.Finish()
 
@@ -131,7 +135,7 @@ func (c *checker) retrieveLinks() {
 					if dest.Scheme == "" {
 						dest.Scheme = "file"
 					}
-					c.target = append(c.target, target{
+					c.targets = append(c.targets, target{
 						rawDestPath: string(node.LinkData.Destination),
 						URL:         dest,
 					})
@@ -142,52 +146,63 @@ func (c *checker) retrieveLinks() {
 	})
 }
 
-func (c *checker) checkLinks() []result {
+func (c *checker) checkLinks() ([]result, error) {
 	var res []result
+	resCh := make(chan result)
 
-	for _, l := range c.target {
-		if l.URL.Scheme == "https" || l.URL.Scheme == "http" {
-			resp, err := c.client.Get(l.URL.String())
-			status := http.StatusOK
-			if err != nil {
-				res = append(res, result{
-					link:       l.rawDestPath,
-					statusCode: http.StatusInternalServerError,
-					err:        err,
-				})
-				continue
+	wg := &sync.WaitGroup{}
+	for _, ts := range c.targets {
+		wg.Add(1)
+		go func(t target) {
+			defer wg.Done()
+			if t.URL.Scheme == "https" || t.URL.Scheme == "http" {
+				resp, err := c.client.Get(t.URL.String())
+				status := http.StatusOK
+				if err != nil {
+					resCh <- result{
+						link:       t.rawDestPath,
+						statusCode: http.StatusInternalServerError,
+						err:        err,
+					}
+				}
+				status = resp.StatusCode
+				resp.Body.Close()
+				resCh <- result{
+					link:       t.rawDestPath,
+					statusCode: status,
+				}
+			} else if t.URL.Scheme == "file" {
+				status := http.StatusOK
+				fpath := t.URL.Path
+				if t.URL.Fragment != "" {
+					base := filepath.Base(c.inputURL.String())
+					fpath += fmt.Sprintf("/%s#%s", base, t.URL.Fragment)
+				}
+				nfpath := fmt.Sprintf("%s://%s%s/../%s", c.inputURL.Scheme, c.inputURL.Host, c.inputURL.Path, fpath)
+				resp, err := c.client.Get(nfpath)
+				if err != nil {
+					resCh <- result{
+						link:       t.rawDestPath,
+						statusCode: http.StatusInternalServerError,
+						err:        err,
+					}
+				}
+				status = resp.StatusCode
+				resp.Body.Close()
+				resCh <- result{
+					link:       t.rawDestPath,
+					statusCode: status,
+				}
 			}
-			status = resp.StatusCode
-			resp.Body.Close()
-			res = append(res, result{
-				link:       l.rawDestPath,
-				statusCode: status,
-			})
-		} else if l.URL.Scheme == "file" {
-			status := http.StatusOK
-			fpath := l.URL.Path
-			if l.URL.Fragment != "" {
-				base := filepath.Base(c.inputURL.String())
-				fpath += fmt.Sprintf("/%s#%s", base, l.URL.Fragment)
-			}
-			nfpath := fmt.Sprintf("%s://%s%s/../%s", c.inputURL.Scheme, c.inputURL.Host, c.inputURL.Path, fpath)
-			resp, err := c.client.Get(nfpath)
-			if err != nil {
-				res = append(res, result{
-					link:       l.rawDestPath,
-					statusCode: http.StatusInternalServerError,
-					err:        err,
-				})
-				continue
-			}
-			status = resp.StatusCode
-			resp.Body.Close()
-			res = append(res, result{
-				link:       l.rawDestPath,
-				statusCode: status,
-			})
-		}
-		DefaultProgressBar.Increment()
+			DefaultProgressBar.Increment()
+		}(ts)
 	}
-	return res
+
+	wg.Wait()
+	close(resCh)
+
+	for r := range resCh {
+		res = append(res, r)
+	}
+	return res, nil
 }
