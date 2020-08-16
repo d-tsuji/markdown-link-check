@@ -15,7 +15,8 @@ func main() {
 		Action: func(c *cli.Context) error {
 			return markdownlink.Check(markdownlink.NewConfig(c))
 		},
-		Flags: []cli.Flag{},
+		Flags:   []cli.Flag{},
+		Version: markdownlink.Version,
 	}
 
 	err := app.Run(os.Args)

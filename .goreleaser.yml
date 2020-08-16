@@ -1,0 +1,59 @@
+project_name: mlc
+before:
+  hooks:
+    - go mod tidy
+builds:
+  -
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - 386
+    main: ./cmd
+    binary: mlc
+    ldflags:
+      - -s -w
+      - "-X main.version={{.Version}}"
+
+archives:
+  - format: zip
+    name_template: "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
+    files:
+      - LICENSE
+      - README.md
+
+nfpms:
+  -
+    formats:
+      - deb
+      - rpm
+    vendor: "d-tsuji"
+    homepage: "https://github.com/d-tsuji/mlc"
+    maintainer: "Tsuji Daishiro"
+    description: "Markdown Link Checker."
+    license: "MIT"
+    file_name_template: "{{.ProjectName}}_{{.Version}}_{{.Os}}-{{.Arch}}"
+    replacements:
+      amd64: 64-bit
+      386: 32-bit
+      darwin: macOS
+      linux: Tux
+
+brews:
+  - description: "Markdown Link Checker."
+    github:
+      owner: d-tsuji
+      name: homebrew-mlc
+    commit_author:
+      name: goreleaserbot
+      email: goreleaser@carlosbecker.com
+    homepage: "https://github.com/d-tsuji/markdown-link-check"
+    install: |
+      bin.install "mlc"
+    test: |
+      system "#{bin}/mlc"
+
+checksum:
+  name_template: "{{ .ProjectName }}_{{ .Version }}_checksums.txt"
