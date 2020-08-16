@@ -70,18 +70,6 @@ func Check(config Config) error {
 	return nil
 }
 
-func getStatusLabel(statusCode int) string {
-	if statusCode >= 500 {
-		return yellow("⚠")
-	} else if statusCode >= 400 {
-		return red("✖")
-	} else if statusCode >= 200 {
-		return green("✓")
-	} else {
-		return yellow("⚠")
-	}
-}
-
 func build(path string) (*checker, error) {
 	transport := new(http.Transport)
 	*transport = *http.DefaultTransport.(*http.Transport) // Clone.
