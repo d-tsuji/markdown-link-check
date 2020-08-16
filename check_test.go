@@ -2,6 +2,8 @@ package markdownlink
 
 import (
 	"testing"
+
+	"go.uber.org/goleak"
 )
 
 func TestCheck(t *testing.T) {
@@ -19,6 +21,7 @@ func TestCheck(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := Check(tt.args.config); (err != nil) != tt.wantErr {
+				defer goleak.VerifyNone(t)
 				t.Errorf("Check() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

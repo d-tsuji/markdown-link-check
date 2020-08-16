@@ -14,4 +14,4 @@ jobs:
       - name: Download Dependencies
         run: go mod download
       - name: Test
-        run: go test -v
+        run: go test -race -v

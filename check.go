@@ -198,8 +198,10 @@ func (c *checker) checkLinks() ([]result, error) {
 		}(ts)
 	}
 
-	wg.Wait()
-	close(resCh)
+	go func() {
+		wg.Wait()
+		close(resCh)
+	}()
 
 	for r := range resCh {
 		res = append(res, r)
