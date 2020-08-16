@@ -40,7 +40,7 @@ func Check(config Config) error {
 	}
 	path := config.args[0]
 	fmt.Fprintf(out, "FILE: %s\n", path)
-	c, err := new(path)
+	c, err := build(path)
 	if err != nil {
 		return err
 	}
@@ -78,8 +78,9 @@ func getStatusLabel(statusCode int) string {
 	}
 }
 
-func new(path string) (*checker, error) {
-	transport := &http.Transport{}
+func build(path string) (*checker, error) {
+	transport := new(http.Transport)
+	*transport = *http.DefaultTransport.(*http.Transport) // Clone.
 	transport.RegisterProtocol("file", http.NewFileTransport(http.Dir(".")))
 	client := &http.Client{Transport: transport, Timeout: 10 * time.Second}
 
