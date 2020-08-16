@@ -177,8 +177,7 @@ func (c *checker) checkLinks() []result {
 				base := filepath.Base(c.inputURL.String())
 				fpath += fmt.Sprintf("/%s#%s", base, l.URL.Fragment)
 			}
-			nfpath := fmt.Sprintf("%s://%s%s/..%s", c.inputURL.Scheme, c.inputURL.Host, c.inputURL.Path, fpath)
-
+			nfpath := fmt.Sprintf("%s://%s%s/../%s", c.inputURL.Scheme, c.inputURL.Host, c.inputURL.Path, fpath)
 			resp, err := c.client.Get(nfpath)
 			if err != nil {
 				res = append(res, result{
