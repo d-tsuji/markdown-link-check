@@ -11,7 +11,7 @@ builds:
     goarch:
       - amd64
       - 386
-    main: ./cmd
+    main: ./cmd/mlc
     binary: mlc
     ldflags:
       - -s -w
@@ -30,7 +30,7 @@ nfpms:
       - deb
       - rpm
     vendor: "d-tsuji"
-    homepage: "https://github.com/d-tsuji/mlc"
+    homepage: "https://github.com/d-tsuji/markdown-link-check"
     maintainer: "Tsuji Daishiro"
     description: "Markdown Link Checker."
     license: "MIT"
