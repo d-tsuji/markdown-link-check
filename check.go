@@ -39,14 +39,18 @@ func Check(config Config) error {
 		return nil
 	}
 	path := config.args[0]
-	fmt.Fprintf(out, "FILE: %s\n", path)
+	fmt.Fprint(out, cyan(fmt.Sprintf("FILE: %s\n", path)))
 	c, err := build(path)
 	if err != nil {
 		return err
 	}
 	c.retrieveLinks()
+	DefaultProgressBar.Start(len(c.target))
 
 	res := c.checkLinks()
+
+	DefaultProgressBar.Finish()
+
 	var errRes []result
 	for _, r := range res {
 		fmt.Fprintf(out, fmt.Sprintf("[%v] %v\n", getStatusLabel(r.statusCode), r.link))
@@ -195,6 +199,7 @@ func (c *checker) checkLinks() []result {
 				statusCode: status,
 			})
 		}
+		DefaultProgressBar.Increment()
 	}
 	return res
 }
