@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -81,10 +82,6 @@ func build(path string) (*checker, error) {
 	client := &http.Client{Transport: transport, Timeout: 10 * time.Second}
 
 	if strings.HasPrefix(path, "https://") || strings.HasPrefix(path, "http://") {
-		u, err := url.Parse(path)
-		if err != nil {
-			return nil, err
-		}
 		resp, err := client.Get(path)
 		if err != nil {
 			return nil, err
@@ -94,6 +91,10 @@ func build(path string) (*checker, error) {
 			return nil, err
 		}
 		b, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+		u, err := replaceURL(path)
 		if err != nil {
 			return nil, err
 		}
@@ -123,6 +124,18 @@ func build(path string) (*checker, error) {
 		}
 		return c, nil
 	}
+}
+
+var pat = regexp.MustCompile(`(http.)://raw\.githubusercontent\.com/(.+?)/(.+?)/(.*)`)
+
+func replaceURL(path string) (*url.URL, error) {
+	g := pat.FindSubmatch([]byte(path))
+	p := fmt.Sprintf("%s://github.com/%s/%s/blob/%s", g[1], g[2], g[3], g[4])
+	u, err := url.Parse(p)
+	if err != nil {
+		return nil, err
+	}
+	return u, nil
 }
 
 func (c *checker) retrieveLinks() {
