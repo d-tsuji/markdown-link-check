@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -16,10 +17,12 @@ import (
 )
 
 type checker struct {
-	inputURL  *url.URL
-	inputData []byte
-	targets   []target
-	client    *http.Client
+	inputURL      *url.URL
+	githubInfo    *github
+	inputData     []byte
+	targets       []target
+	currentDirURL *url.URL
+	client        *http.Client
 }
 
 type target struct {
@@ -94,17 +97,26 @@ func build(path string) (*checker, error) {
 		if err != nil {
 			return nil, err
 		}
-		u, err := replaceURL(path)
+		u, g, err := replaceURL(path)
 		if err != nil {
 			return nil, err
 		}
 		c := &checker{
-			inputURL:  u,
-			inputData: b,
-			client:    client,
+			inputURL:   u,
+			githubInfo: g,
+			inputData:  b,
+			client:     client,
 		}
 		return c, nil
 	} else {
+		pwd, err := os.Getwd()
+		if err != nil {
+			return nil, err
+		}
+		pwdURL, err := urlFromFilePath(pwd)
+		if err != nil {
+			return nil, err
+		}
 		absPath, err := filepath.Abs(path)
 		if err != nil {
 			return nil, err
@@ -118,24 +130,31 @@ func build(path string) (*checker, error) {
 			return nil, err
 		}
 		c := &checker{
-			inputURL:  abs,
-			inputData: f,
-			client:    client,
+			inputURL:      abs,
+			inputData:     f,
+			currentDirURL: pwdURL,
+			client:        client,
 		}
 		return c, nil
 	}
 }
 
-var pat = regexp.MustCompile(`(http.)://raw\.githubusercontent\.com/(.+?)/(.+?)/(.*)`)
+var pat = regexp.MustCompile(`(http.)://raw\.githubusercontent\.com/(.+?)/(.+?)/(.+?)/(.*)`)
 
-func replaceURL(path string) (*url.URL, error) {
+type github struct {
+	user   string
+	repo   string
+	branch string
+}
+
+func replaceURL(path string) (*url.URL, *github, error) {
 	g := pat.FindSubmatch([]byte(path))
-	p := fmt.Sprintf("%s://github.com/%s/%s/blob/%s", g[1], g[2], g[3], g[4])
+	p := fmt.Sprintf("%s://github.com/%s/%s/blob/%s/%s", g[1], g[2], g[3], g[4], g[5])
 	u, err := url.Parse(p)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return u, nil
+	return u, &github{string(g[2]), string(g[3]), string(g[4])}, nil
 }
 
 func (c *checker) retrieveLinks() {
@@ -163,7 +182,7 @@ func (c *checker) checkLinks() ([]result, error) {
 	var res []result
 	resCh := make(chan result)
 
-	wg := &sync.WaitGroup{}
+	var wg sync.WaitGroup
 	for _, ts := range c.targets {
 		wg.Add(1)
 		go func(t target) {
@@ -185,26 +204,61 @@ func (c *checker) checkLinks() ([]result, error) {
 					statusCode: status,
 				}
 			} else if t.URL.Scheme == "file" {
-				status := http.StatusOK
-				fpath := t.URL.Path
-				if t.URL.Fragment != "" {
-					base := filepath.Base(c.inputURL.String())
-					fpath += fmt.Sprintf("/%s#%s", base, t.URL.Fragment)
-				}
-				nfpath := fmt.Sprintf("%s://%s%s/../%s", c.inputURL.Scheme, c.inputURL.Host, c.inputURL.Path, fpath)
-				resp, err := c.client.Get(nfpath)
-				if err != nil {
+				if c.inputURL.Scheme == "http" || c.inputURL.Scheme == "https" {
+					root := fmt.Sprintf("https://github.com/%s/%s/blob/%s", c.githubInfo.user, c.githubInfo.repo, c.githubInfo.branch)
+					// Get the differential path from the root directory to the file path
+					f := strings.ReplaceAll(c.inputURL.String(), root, "")
+					if t.URL.Path == "" {
+						t.URL.Path = f
+					}
+					if t.URL.Fragment != "" {
+						t.URL.Path += "#" + t.URL.Fragment
+					}
+					targetURL := fmt.Sprintf("%s%s", root, t.URL.Path)
+					if !strings.HasPrefix(t.URL.Path, "/") {
+						targetURL = c.inputURL.String() + "/../" + t.URL.Path
+					}
+					status := http.StatusOK
+					resp, err := c.client.Get(targetURL)
+					if err != nil {
+						resCh <- result{
+							link:       t.rawDestPath,
+							statusCode: http.StatusInternalServerError,
+							err:        err,
+						}
+					}
+					status = resp.StatusCode
+					resp.Body.Close()
 					resCh <- result{
 						link:       t.rawDestPath,
-						statusCode: http.StatusInternalServerError,
-						err:        err,
+						statusCode: status,
 					}
-				}
-				status = resp.StatusCode
-				resp.Body.Close()
-				resCh <- result{
-					link:       t.rawDestPath,
-					statusCode: status,
+				} else if c.inputURL.Scheme == "file" {
+					if t.URL.Path == "" {
+						t.URL.Path = c.inputURL.String()
+					}
+					if t.URL.Fragment != "" {
+						t.URL.Path += "#" + t.URL.Fragment
+					}
+					targetURL := t.URL.Path
+					if strings.HasPrefix(t.URL.Path, "/") {
+						targetURL = c.currentDirURL.String() + t.URL.Path
+					}
+					status := http.StatusOK
+					resp, err := c.client.Get(targetURL)
+					if err != nil {
+						resCh <- result{
+							link:       t.rawDestPath,
+							statusCode: http.StatusInternalServerError,
+							err:        err,
+						}
+					}
+					status = resp.StatusCode
+					resp.Body.Close()
+					resCh <- result{
+						link:       t.rawDestPath,
+						statusCode: status,
+					}
 				}
 			}
 			DefaultProgressBar.Increment()
