@@ -18,6 +18,8 @@ It supports two ways of loading markdowns.
 
 1. To check the markdown by loading it directly from raw.githubusercontent.com
 
+![mlc_github.gif](./gif/mlc_github.gif)
+
 ```
 $ mlc https://raw.githubusercontent.com/d-tsuji/flower/master/README.md
 FILE: https://raw.githubusercontent.com/d-tsuji/flower/master/README.md
