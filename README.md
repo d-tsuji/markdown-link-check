@@ -20,38 +20,48 @@ It supports two ways of loading markdowns.
 
 ```
 $ mlc https://raw.githubusercontent.com/d-tsuji/flower/master/README.md
-[✓] https://goreportcard.com/report/github.com/d-tsuji/flower
-[✓] https://goreportcard.com/badge/github.com/d-tsuji/flower
+FILE: https://raw.githubusercontent.com/d-tsuji/flower/master/README.md
+Checking... 13 / 13 [--------------------] 100.00%
 [✓] https://img.shields.io/badge/license-MIT-blue.svg
-[✓] https://github.com/d-tsuji/flower/actions
+[✓] https://en.wikipedia.org/wiki/Directed_acyclic_graph
 [✓] https://github.com/d-tsuji/flower/workflows/build/badge.svg
 [✓] https://godoc.org/github.com/d-tsuji/flower
-[✓] https://godoc.org/github.com/d-tsuji/flower?status.svg
+[✓] #post-registertask_id
 [✓] /doc/images/system_overview.png
-[✓] https://en.wikipedia.org/wiki/Directed_acyclic_graph
+[✓] https://goreportcard.com/badge/github.com/d-tsuji/flower
+[✓] https://goreportcard.com/report/github.com/d-tsuji/flower
+[✓] https://github.com/d-tsuji/flower/blob/master/LICENSE
 [✓] /doc/images/task_structure.png
 [✓] https://github.com/jwilder/dockerize
-[✓] #post-registertask_id
-[✓] https://github.com/d-tsuji/flower/blob/master/LICENSE
+[✓] https://github.com/d-tsuji/flower/actions
+[✓] https://godoc.org/github.com/d-tsuji/flower?status.svg
 ```
 
 2. How to specify a local markdown file
 
 ```
 $ mlc testdata/README.md
+FILE: testdata/README.md
+Checking... 13 / 13 [--------------------] 100.00%
+[✖] /doc/images/system_overview.png
+[✖] /doc/images/task_structure.png
+[✓] https://img.shields.io/badge/license-MIT-blue.svg
+[✓] #post-registertask_id
+[✓] https://github.com/d-tsuji/flower/actions
+[✓] https://github.com/d-tsuji/flower/blob/master/LICENSE
+[✓] https://github.com/d-tsuji/flower/workflows/build/badge.svg
+[✓] https://github.com/jwilder/dockerize
+[✓] https://godoc.org/github.com/d-tsuji/flower?status.svg
+[✓] https://godoc.org/github.com/d-tsuji/flower
+[✓] https://en.wikipedia.org/wiki/Directed_acyclic_graph
 [✓] https://goreportcard.com/report/github.com/d-tsuji/flower
 [✓] https://goreportcard.com/badge/github.com/d-tsuji/flower
-[✓] https://img.shields.io/badge/license-MIT-blue.svg
-[✓] https://github.com/d-tsuji/flower/actions
-[✓] https://github.com/d-tsuji/flower/workflows/build/badge.svg
-[✓] https://godoc.org/github.com/d-tsuji/flower
-[✓] https://godoc.org/github.com/d-tsuji/flower?status.svg
-[✓] /doc/images/system_overview.png
-[✓] https://en.wikipedia.org/wiki/Directed_acyclic_graph
-[✓] /doc/images/task_structure.png
-[✓] https://github.com/jwilder/dockerize
-[✓] #post-registertask_id
-[✓] https://github.com/d-tsuji/flower/blob/master/LICENSE
+
+13 links checked.
+
+ERROR: 2 dead links found!
+[✖] /doc/images/system_overview.png -> Status: 404
+[✖] /doc/images/task_structure.png -> Status: 404
 ```
 
 ## Install
