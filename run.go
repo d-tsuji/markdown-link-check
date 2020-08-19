@@ -148,31 +148,37 @@ func Run(cf *config) error {
 		close(resCh)
 	}()
 
-	var res []result
+	m := make(map[string][]result)
 	for r := range resCh {
-		res = append(res, r)
+		m[r.fileName] = append(m[r.fileName], r)
 	}
 
 	DefaultProgressBar.Finish()
-	print(out, res)
+	print(out, contents, m)
 
 	return nil
 }
 
-func print(out io.Writer, res []result) {
-	var errRes []result
-	for _, r := range res {
-		fmt.Fprintf(out, fmt.Sprintf("[%v] %v\n", getStatusLabel(r.statusCode), r.rawLink))
-		if r.statusCode >= 400 {
-			errRes = append(errRes, r)
-		}
-	}
-	fmt.Fprintf(out, "\n%d links checked.\n", len(res))
+func print(out io.Writer, contents []*content, m map[string][]result) {
+	for _, c := range contents {
+		res := m[c.filePath]
+		fmt.Fprint(out, fmt.Sprintf("FILE: %s\n", c.filePath))
 
-	if len(errRes) > 0 {
-		fmt.Fprint(out, red(fmt.Sprintf("\nERROR: %d dead links found!\n", len(errRes))))
-	}
-	for _, r := range errRes {
-		fmt.Fprintf(out, fmt.Sprintf("[%v] %v -> Status: %d\n", getStatusLabel(r.statusCode), r.rawLink, r.statusCode))
+		var errRes []result
+		for _, r := range res {
+			fmt.Fprintf(out, fmt.Sprintf("[%v] %v\n", getStatusLabel(r.statusCode), r.rawLink))
+			if r.statusCode >= 400 {
+				errRes = append(errRes, r)
+			}
+		}
+		fmt.Fprintf(out, "\n%d links checked.\n", len(res))
+
+		if len(errRes) > 0 {
+			fmt.Fprint(out, red(fmt.Sprintf("\nERROR: %d dead links found!\n", len(errRes))))
+		}
+		for _, r := range errRes {
+			fmt.Fprintf(out, fmt.Sprintf("[%v] %v -> Status: %d\n", getStatusLabel(r.statusCode), r.rawLink, r.statusCode))
+		}
+		fmt.Fprintln(out, "")
 	}
 }

@@ -25,11 +25,16 @@ var pat = regexp.MustCompile(`http.://raw\.githubusercontent\.com/(.+?)/(.+?)/(.
 
 func NewConfig(c *cli.Context) *config {
 	if c.Bool("all") {
-		ts := oauth2.StaticTokenSource(
-			&oauth2.Token{AccessToken: c.String("token")},
-		)
-		tc := oauth2.NewClient(c.Context, ts)
-		client := github.NewClient(tc)
+		var client *github.Client
+		if c.String("token") != "" {
+			ts := oauth2.StaticTokenSource(
+				&oauth2.Token{AccessToken: c.String("token")},
+			)
+			tc := oauth2.NewClient(c.Context, ts)
+			client = github.NewClient(tc)
+		} else {
+			client = github.NewClient(nil)
+		}
 		return &config{
 			ctx:     c.Context,
 			client:  client,

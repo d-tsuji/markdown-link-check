@@ -25,9 +25,6 @@ func main() {
 				if c.String("branch") == "" {
 					return errors.New(`required "--branch [branch]" flag`)
 				}
-				if c.String("token") == "" {
-					return errors.New(`required "--token [token]" flag`)
-				}
 			} else {
 				if c.Args().Len() != 1 {
 					return errors.New(`URL must be required or "--all" flag forget to scan repository`)
