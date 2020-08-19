@@ -30,7 +30,7 @@ func main() {
 				}
 			} else {
 				if c.Args().Len() != 1 {
-					return errors.New("URL must be required")
+					return errors.New(`URL must be required or "--all" flag forget to scan repository`)
 				}
 			}
 			return mlc.Run(mlc.NewConfig(c))
