@@ -1,10 +1,12 @@
 package main
 
 import (
+	"errors"
 	"log"
 	"os"
 
-	"github.com/d-tsuji/markdownlink"
+	"github.com/d-tsuji/mlc"
+
 	"github.com/urfave/cli/v2"
 )
 
@@ -13,10 +15,55 @@ func main() {
 		Name:  "mlc",
 		Usage: "Markdown Link Checker",
 		Action: func(c *cli.Context) error {
-			return markdownlink.Check(markdownlink.NewConfig(c))
+			if c.Bool("all") {
+				if c.String("user") == "" {
+					return errors.New(`required "--user [user]" flag`)
+				}
+				if c.String("repo") == "" {
+					return errors.New(`required "--repo [repo]" flag`)
+				}
+				if c.String("branch") == "" {
+					return errors.New(`required "--branch [branch]" flag`)
+				}
+				if c.String("token") == "" {
+					return errors.New(`required "--token [token]" flag`)
+				}
+			} else {
+				if c.Args().Len() != 1 {
+					return errors.New("URL must be required")
+				}
+			}
+			return mlc.Run(mlc.NewConfig(c))
 		},
-		Flags:   []cli.Flag{},
-		Version: markdownlink.Version,
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:    "user",
+				Aliases: []string{"u"},
+				Usage:   "target GitHub repository user",
+			},
+			&cli.StringFlag{
+				Name:    "repo",
+				Aliases: []string{"r"},
+				Usage:   "target GitHub repository name",
+			},
+			&cli.StringFlag{
+				Name:    "branch",
+				Aliases: []string{"b"},
+				Usage:   "target GitHub repository branch",
+				Value:   "master",
+			},
+			&cli.StringFlag{
+				Name:    "token",
+				Aliases: []string{"t"},
+				Usage:   "target GitHub access token",
+			},
+			&cli.BoolFlag{
+				Name:    "all",
+				Aliases: []string{"a"},
+				Usage:   "all scan repository mode (required GitHub access token)",
+			},
+		},
+		Version: mlc.Version,
 	}
 
 	err := app.Run(os.Args)

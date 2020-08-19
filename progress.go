@@ -1,4 +1,4 @@
-package markdownlink
+package mlc
 
 import (
 	"github.com/cheggaaa/pb/v3"

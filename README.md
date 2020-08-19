@@ -10,19 +10,18 @@ xxx
 
 ## Usage
 
-```bash
-$ mlc ./README.md
-```
-
 It supports two ways of loading markdowns.
 
-1. To check the markdown by loading it directly from raw.githubusercontent.com
-
-![mlc_github.gif](./gif/mlc_github.gif)
+1. To check the markdown by loading it directly from `raw.githubusercontent.com`.
 
 ```
 $ mlc https://raw.githubusercontent.com/d-tsuji/flower/master/README.md
-FILE: https://raw.githubusercontent.com/d-tsuji/flower/master/README.md
+```
+
+```
+1 file found.
+FILE: README.md
+
 Checking... 13 / 13 [--------------------] 100.00%
 [✓] https://img.shields.io/badge/license-MIT-blue.svg
 [✓] https://en.wikipedia.org/wiki/Directed_acyclic_graph
@@ -39,11 +38,18 @@ Checking... 13 / 13 [--------------------] 100.00%
 [✓] https://godoc.org/github.com/d-tsuji/flower?status.svg
 ```
 
-2. How to specify a local markdown file
+2. Check the links in the markdown files contained in the entire repository.
+
+It is usually assumed that you specify the repository you are the owner of. You need an access token. You can scan without a token, but you are subject to GitHub's RateLimit limit.
 
 ```
-$ mlc testdata/README.md
-FILE: testdata/README.md
+$ mlc --user d-tsuji --repo flower --token 0123456789abcdefghijklmnopqrstuvwxyz0123 --all
+```
+
+```
+1 file found.
+FILE: README.md
+
 Checking... 13 / 13 [--------------------] 100.00%
 [✖] /doc/images/system_overview.png
 [✖] /doc/images/task_structure.png
@@ -83,14 +89,14 @@ $ brew install mlc
 ### CentOS
 
 ```
-$ sudo rpm -ivh https://github.com/d-tsuji/markdown-link-check/releases/download/v0.0.4/mlc_0.0.4_Tux-64-bit.rpm
+$ sudo rpm -ivh https://github.com/d-tsuji/markdown-link-check/releases/download/v0.0.5/mlc_0.0.5_Tux-64-bit.rpm
 ```
 
 ### Debian, Ubuntu
 
 ```
-$ wget https://github.com/d-tsuji/markdown-link-check/releases/download/v0.0.4/mlc_0.0.4_Tux-64-bit.deb
-$ sudo dpkg -i mlc_0.0.4_Tux-64-bit.deb
+$ wget https://github.com/d-tsuji/markdown-link-check/releases/download/v0.0.5/mlc_0.0.5_Tux-64-bit.deb
+$ sudo dpkg -i mlc_0.0.5_Tux-64-bit.deb
 ```
 
 ### go get
