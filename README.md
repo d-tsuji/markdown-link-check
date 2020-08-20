@@ -89,14 +89,14 @@ $ brew install mlc
 ### CentOS
 
 ```
-$ sudo rpm -ivh https://github.com/d-tsuji/markdown-link-check/releases/download/v0.0.6/mlc_0.0.6_Tux-64-bit.rpm
+$ sudo rpm -ivh https://github.com/d-tsuji/markdown-link-check/releases/download/v0.0.7/mlc_0.0.7_Tux-64-bit.rpm
 ```
 
 ### Debian, Ubuntu
 
 ```
-$ wget https://github.com/d-tsuji/markdown-link-check/releases/download/v0.0.6/mlc_0.0.6_Tux-64-bit.deb
-$ sudo dpkg -i mlc_0.0.6_Tux-64-bit.deb
+$ wget https://github.com/d-tsuji/markdown-link-check/releases/download/v0.0.7/mlc_0.0.7_Tux-64-bit.deb
+$ sudo dpkg -i mlc_0.0.7_Tux-64-bit.deb
 ```
 
 ### go get
