@@ -59,11 +59,7 @@ func Run(cf *config) error {
 
 	var totalLinks int
 	for _, content := range contents {
-		req, err := http.NewRequestWithContext(cf.ctx, "GET", fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s/%s", cf.owner, cf.repo, cf.branch, content.filePath), nil)
-		if err != nil {
-			return err
-		}
-		resp, err := http.DefaultClient.Do(req)
+		resp, err := http.Get(fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s/%s", cf.owner, cf.repo, cf.branch, content.filePath))
 		if err != nil {
 			return err
 		}
@@ -90,18 +86,18 @@ func Run(cf *config) error {
 			go func(link string) {
 				defer wg.Done()
 				if strings.HasPrefix(link, "https") || strings.HasPrefix(link, "http") {
-					resp, err := http.Get(link)
 					var (
 						status = http.StatusOK
 						errr   error
 					)
+					resp, err := http.Get(link)
 					if err != nil {
 						status = http.StatusInternalServerError
 						errr = err
 					} else {
 						status = resp.StatusCode
+						resp.Body.Close()
 					}
-					resp.Body.Close()
 					resCh <- result{
 						fileName:   c.filePath,
 						rawLink:    link,
@@ -119,18 +115,18 @@ func Run(cf *config) error {
 					} else if !strings.HasPrefix(link, "/") {
 						targetURL = root + "../" + link
 					}
-					resp, err := http.Get(targetURL)
 					var (
 						status = http.StatusOK
 						errr   error
 					)
+					resp, err := http.Get(targetURL)
 					if err != nil {
 						status = http.StatusInternalServerError
 						errr = err
 					} else {
 						status = resp.StatusCode
+						resp.Body.Close()
 					}
-					resp.Body.Close()
 					resCh <- result{
 						fileName:   c.filePath,
 						rawLink:    link,
