@@ -102,5 +102,5 @@ $ sudo dpkg -i mlc_0.0.7_Tux-64-bit.deb
 ### go get
 
 ```
-$ go get -u github.com/d-tsuji/markdownlink/cmd/mlc
+$ go get -u github.com/d-tsuji/mlc/cmd/mlc
 ```
